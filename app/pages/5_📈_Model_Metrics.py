@@ -11,9 +11,19 @@ Enterprise CRM platform. It details the mathematical reasoning behind customer s
 and the performance metrics of the predictive churn engine.
 """)
 
-# CLOUD-SAFE PATHING
-BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
-MODELS_DIR = os.path.join(BASE_DIR, "models")
+# --- THE FIX IS HERE: CLOUD-SAFE PATHING ---
+# 1. Current file: app/pages/5_📈_Model_Metrics.py
+PAGES_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 2. Go up to 'app' folder
+APP_DIR = os.path.dirname(PAGES_DIR)
+
+# 3. Go up to root repository folder (where 'models' is actually located)
+ROOT_DIR = os.path.dirname(APP_DIR)
+
+# 4. Connect to the models folder
+MODELS_DIR = os.path.join(ROOT_DIR, "models")
+
 
 def _img(filename):
     path = os.path.join(MODELS_DIR, filename)
