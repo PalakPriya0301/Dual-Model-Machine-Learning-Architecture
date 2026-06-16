@@ -32,7 +32,7 @@ def load_raw_transactions():
         elif os.path.exists(csv_path):
              return pd.read_csv(csv_path, nrows=1000, encoding="ISO-8859-1")
         else:
-             st.info(f"⚠️ Note: Raw dataset not pushed to cloud storage to save space. AI profiles below are fully loaded.")
+             
              return None
     except Exception as e:
         st.error(f"Error loading raw file: {e}")
