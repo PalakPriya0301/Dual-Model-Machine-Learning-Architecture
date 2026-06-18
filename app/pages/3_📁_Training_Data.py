@@ -54,15 +54,8 @@ col3.metric("Avg Lifetime Spend", f"${df_historical['Monetary'].mean():,.2f}")
 
 st.markdown("---")
 
-st.markdown("### 🛒 1. Raw Transactional File (The 'Before')")
-st.markdown("This is a sample of the raw `Online Retail` file before the ETL pipeline cleans it and groups it by CustomerID.")
 
-if df_raw is not None:
-    st.dataframe(df_raw, use_container_width=True, height=300)
-
-st.markdown("<br><div style='text-align: center;'>⬇️ <i>ETL Pipeline groups these transactions by Customer into RFM features...</i> ⬇️</div><br>", unsafe_allow_html=True)
-
-st.markdown("### 🧠 2. AI-Scored Customer Profiles (The 'After')")
+st.markdown("### 🧠 AI-Scored Customer Profiles (The 'After')")
 st.markdown("This is the final dataset after Unsupervised Clustering (Persona) and Supervised Classification (Churn).")
 
 st.dataframe(
