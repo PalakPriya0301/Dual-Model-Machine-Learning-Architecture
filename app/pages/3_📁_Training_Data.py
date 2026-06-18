@@ -7,7 +7,7 @@ st.set_page_config(page_title="Training Data Archive", page_icon="📁", layout=
 st.title("📁 AI Training Data Archive")
 st.markdown("""
 This module provides complete transparency into the data pipeline. 
-Below you can view the **Raw Transactional Data** (Before) and the resulting **AI-Scored Customer Profiles** (After).
+Below you can view the resulting **AI-Scored Customer Profiles**.
 """)
 
 # CLOUD-SAFE PATHING
