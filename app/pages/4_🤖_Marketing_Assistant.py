@@ -8,13 +8,13 @@ from dotenv import load_dotenv
 
 st.set_page_config(page_title="Marketing Assistant", layout="wide")
 
-# CLOUD-SAFE SECRETS HANDLING
+
 try:
-    # Try fetching from Streamlit Cloud Secrets first
+    
     SENDER_EMAIL = st.secrets["SENDER_EMAIL"]
     APP_PASSWORD = st.secrets["APP_PASSWORD"]
 except Exception:
-    # Fallback to local .env file
+   
     load_dotenv()
     SENDER_EMAIL = os.getenv("SENDER_EMAIL", "")
     APP_PASSWORD  = os.getenv("APP_PASSWORD", "")

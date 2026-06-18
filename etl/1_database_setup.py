@@ -1,88 +1,3 @@
-# import pandas as pd
-# import sqlite3
-# import os
-# import sys
-
-# # ── 1. LOADING DATA ───────────────────────────────────────────
-# print("⏳ [1/4] Loading E-Commerce Data...")
-
-# # 🤖 THE FIX: Fully autonomous file detection and decoding!
-# if os.path.exists("data/Online Retail.xlsx"):
-#     print("   ✅ Detected Excel file (.xlsx)...")
-#     df = pd.read_excel("data/Online Retail.xlsx")
-
-# elif os.path.exists("data/Online Retail.csv"):
-#     print("   ✅ Detected CSV file (.csv)...")
-#     # Added 'unicode_escape' to prevent the UTF-8 crash from special characters!
-#     df = pd.read_csv("data/Online Retail.csv", encoding='unicode_escape')
-
-# else:
-#     print("❌ ERROR: Could not find 'Online Retail.xlsx' or 'Online Retail.csv' in the data folder!")
-#     sys.exit()
-
-# print(f"   Raw rows found: {len(df)}")
-
-# # ── 2. DATA RECONCILIATION & CLEANING ─────────────────────────
-# print("⚙️ [2/4] Executing Data Reconciliation (Cleaning)...")
-
-# df.columns = df.columns.str.strip()
-
-# if 'OrderStatus' in df.columns:
-#     valid_orders = ['Delivered']
-#     df = df[df['OrderStatus'].isin(valid_orders)]
-
-# if 'TotalAmount' in df.columns and 'UnitPrice' in df.columns:
-#     df = df.drop(columns=['UnitPrice'])
-
-# df = df.rename(columns={
-#     'TransactionNo': 'InvoiceNo',
-#     'OrderID': 'InvoiceNo',
-#     'Date': 'InvoiceDate',
-#     'OrderDate': 'InvoiceDate',
-#     'Price': 'UnitPrice',
-#     'TotalAmount': 'UnitPrice', 
-#     'CustomerNo': 'CustomerID',
-#     'Customer ID': 'CustomerID'
-# })
-
-# if 'CustomerID' not in df.columns:
-#     print(f"❌ ERROR: 'CustomerID' column missing! Available columns are: {list(df.columns)}")
-#     sys.exit()
-
-# df = df.dropna(subset=['CustomerID'])
-
-# if 'Quantity' in df.columns:
-#     df = df[df['Quantity'] > 0]
-# else:
-#     df['Quantity'] = 1  
-
-# if 'UnitPrice' in df.columns:
-#     df = df[df['UnitPrice'] > 0]
-
-# df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate']).dt.strftime('%Y-%m-%d %H:%M:%S')
-# df['CustomerID'] = df['CustomerID'].astype(str)
-
-# print(f"   Clean rows remaining: {len(df)}")
-
-# # ── 3. DATABASE INITIALIZATION ────────────────────────────────
-# print("💾 [3/4] Initializing persistent SQLite database...")
-# db_name = "enterprise_crm.db"
-# conn = sqlite3.connect(db_name)
-
-# # ── 4. WRITING TO STORAGE ─────────────────────────────────────
-# print("⏳ [4/4] Writing to 'raw_transactions' table...")
-# df_final = df[['InvoiceNo', 'InvoiceDate', 'CustomerID', 'UnitPrice', 'Quantity']]
-# df_final.to_sql("raw_transactions", conn, if_exists="replace", index=False)
-
-# cursor = conn.cursor()
-# cursor.execute("SELECT COUNT(*) FROM raw_transactions")
-# row_count = cursor.fetchone()[0]
-# conn.close()
-
-# print("=" * 60)
-# print(f"✅ SUCCESS: {row_count} transactions permanently saved to {db_name}")
-# print("=" * 60)
-
 import pandas as pd
 import sqlite3
 import os
@@ -93,7 +8,7 @@ APP_DIR    = os.path.join(ROOT_DIR, "app")
 DATA_DIR   = os.path.join(ROOT_DIR, "data")
 DB_PATH    = os.path.join(APP_DIR, "enterprise_crm.db")
 
-# ── 1. LOADING DATA ───────────────────────────────────────────
+
 print("⏳ [1/4] Loading E-Commerce Data...")
 
 excel_path = os.path.join(DATA_DIR, "Online Retail.xlsx")
@@ -113,7 +28,7 @@ else:
 
 print(f"   Raw rows found: {len(df)}")
 
-# ── 2. DATA CLEANING ──────────────────────────────────────────
+
 print("⚙️ [2/4] Executing Data Reconciliation (Cleaning)...")
 
 df.columns = df.columns.str.strip()
@@ -154,11 +69,8 @@ df['CustomerID']  = df['CustomerID'].astype(str)
 
 print(f"   Clean rows remaining: {len(df)}")
 
-# ── 3. DATABASE INITIALIZATION ────────────────────────────────
 print(f"💾 [3/4] Saving database to: {DB_PATH}")
 conn = sqlite3.connect(DB_PATH)
-
-# ── 4. WRITING TO STORAGE ─────────────────────────────────────
 print("⏳ [4/4] Writing to 'raw_transactions' table...")
 df_final = df[['InvoiceNo', 'InvoiceDate', 'CustomerID', 'UnitPrice', 'Quantity']]
 df_final.to_sql("raw_transactions", conn, if_exists="replace", index=False)

@@ -8,8 +8,7 @@ import sys
 
 st.set_page_config(page_title="Enterprise AI Segmentation", page_icon="🏢", layout="centered")
 
-# ── CLOUD-SAFE PATH RESOLUTION ────────────────────────────────
-# Dynamically locks to the folder where Home.py is located (Repo Root)
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))         
 ETL_DIR  = os.path.join(BASE_DIR, "etl")
 DB_PATH  = os.path.join(BASE_DIR, "enterprise_crm.db")
@@ -18,7 +17,7 @@ def _pkl(name):
     """Return full path to a pkl file in the base directory"""
     return os.path.join(BASE_DIR, name)
 
-# ── SIDEBAR: NIGHTLY BATCH SYNC ───────────────────────────────
+
 st.sidebar.markdown("### 🔄 Enterprise MLOps")
 if st.sidebar.button("Run Nightly Batch Sync", type="primary"):
     python = sys.executable

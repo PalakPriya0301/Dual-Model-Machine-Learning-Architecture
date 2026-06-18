@@ -10,7 +10,7 @@ st.set_page_config(page_title="Predict New Customer", layout="wide")
 st.title("🔮 Predict Customer Persona & Churn Risk")
 st.write("Enter metrics below to classify a new customer and calculate their churn probability.")
 
-# ── GUARD ─────────────────────────────────────────────────────
+
 _required_keys = ['historical_model', 'churn_model', 'scaler', 'label_map']
 if any(k not in st.session_state for k in _required_keys):
     st.error("⚠️ Models not loaded. Please go to the **Home** page first to initialise the system.")
