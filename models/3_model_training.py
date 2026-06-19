@@ -32,7 +32,7 @@ print(f"   PNG : {SCRIPT_DIR}")
 print(f"\n [1/7] Loading database...")
 
 if not os.path.exists(DB_PATH):
-    print(f"❌ ERROR: Database not found at {DB_PATH}")
+    print(f" ERROR: Database not found at {DB_PATH}")
     print("   Run etl/1_database_setup.py then etl/2_feature_engineering.py first.")
     exit()
 
@@ -42,7 +42,7 @@ try:
     conn.close()
     print(f"   ✅ Loaded {len(df)} customers.")
 except Exception as e:
-    print(f"   ❌ ERROR: {e}")
+    print(f"  ERROR: {e}")
     exit()
 
 
@@ -67,29 +67,52 @@ for k in K_range:
     silhouette_vals.append(silhouette_score(X_scaled, lbl))
 
 fig_val, ax_val = plt.subplots(1, 2, figsize=(12, 4))
+
 ax_val[0].plot(K_range, inertia_vals, marker='o', color='steelblue')
-ax_val[0].axvline(x=3, color='red', linestyle='--', label='K=3 chosen')
 ax_val[0].set_title('Elbow Method (Inertia)')
 ax_val[0].set_xlabel('Number of Clusters (K)')
 ax_val[0].set_ylabel('Inertia')
-ax_val[0].legend()
 ax_val[0].grid(True, alpha=0.3)
 
 ax_val[1].plot(K_range, silhouette_vals, marker='s', color='darkorange')
-ax_val[1].axvline(x=3, color='red', linestyle='--', label='K=3 chosen')
 ax_val[1].set_title('Silhouette Score')
 ax_val[1].set_xlabel('Number of Clusters (K)')
 ax_val[1].set_ylabel('Score')
-ax_val[1].legend()
 ax_val[1].grid(True, alpha=0.3)
+
+# Final cluster selection after Elbow + Silhouette validation
+optimal_k = 3
+
+ax_val[0].axvline(
+    x=optimal_k,
+    color='red',
+    linestyle='--',
+    label=f'K={optimal_k} chosen'
+)
+
+ax_val[1].axvline(
+    x=optimal_k,
+    color='red',
+    linestyle='--',
+    label=f'K={optimal_k} chosen'
+)
+
+ax_val[0].legend()
+ax_val[1].legend()
+
+kmeans = KMeans(
+    n_clusters=optimal_k,
+    init='k-means++',
+    random_state=42,
+    n_init=10
+)
 
 plt.tight_layout()
 plt.savefig(os.path.join(SCRIPT_DIR, 'clustering_validation.png'), dpi=150)
 plt.close()
+
 print("   clustering_validation.png saved.")
 
-
-kmeans        = KMeans(n_clusters=3, init='k-means++', random_state=42, n_init=10)
 df['Cluster'] = kmeans.fit_predict(X_scaled)
 
 cluster_means = df.groupby('Cluster')['Monetary'].mean().sort_values()
@@ -122,7 +145,7 @@ rf_model.fit(X_train, y_train)
 print("\n [5/7] Generating evaluation metrics...")
 
 y_proba          = rf_model.predict_proba(X_test)[:, 1]
-custom_threshold = 0.35
+custom_threshold = 0.35  # selected to improve recall and identify more at-risk customers
 y_pred_custom    = (y_proba >= custom_threshold).astype(int)
 roc_auc          = roc_auc_score(y_test, y_proba)
 
@@ -162,7 +185,7 @@ ax_fi.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig(os.path.join(SCRIPT_DIR, 'feature_importance.png'), dpi=150)
 plt.close()
-print("   ✅ feature_importance.png saved.")
+print("   feature_importance.png saved.")
 
 print("\n [7/7] Saving AI assets to app/ folder...")
 
@@ -183,7 +206,7 @@ precision = precision_score(y_test, y_pred_custom)
 recall    = recall_score(y_test, y_pred_custom)
 f1        = f1_score(y_test, y_pred_custom)
 
-print(f"\nSUCCESS! Final ROC-AUC: {roc_auc:.4f} (Proves overall AI Intelligence)")
+
 
 print("\n" + "═" * 60)
 print(f" Standard Threshold: 0.50")
