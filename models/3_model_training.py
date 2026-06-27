@@ -80,7 +80,6 @@ ax_val[1].set_xlabel('Number of Clusters (K)')
 ax_val[1].set_ylabel('Score')
 ax_val[1].grid(True, alpha=0.3)
 
-# Final cluster selection after Elbow + Silhouette validation
 optimal_k = 3
 
 ax_val[0].axvline(
@@ -117,7 +116,6 @@ df['Cluster'] = kmeans.fit_predict(X_scaled)
 
 cluster_means = df.groupby('Cluster')['Monetary'].mean().sort_values()
 
-
 persona_labels = {
     int(cluster_means.index[0]): "At-Risk Sleepers",
     int(cluster_means.index[1]): "Promising Newcomers",
@@ -126,8 +124,9 @@ persona_labels = {
 df['Persona'] = df['Cluster'].map(persona_labels)
 print(df['Persona'].value_counts())
 
+
 print("\n [4/7] Training Random Forest Churn Predictor...")
-X_churn = df[['Frequency', 'Monetary']]
+X_churn = df[['Frequency', 'Monetary', 'TotalQuantity', 'AvgOrderValue']]
 X_train, X_test, y_train, y_test = train_test_split(
     X_churn, y, test_size=0.2, random_state=42, stratify=y
 )
@@ -172,11 +171,11 @@ print("   model_evaluation.png saved.")
 
 print("\n [6/7] Generating feature importance chart...")
 
-fig_fi, ax_fi = plt.subplots(figsize=(6, 3))
+fig_fi, ax_fi = plt.subplots(figsize=(8, 4))
 bars = ax_fi.barh(
-    ['Frequency', 'Monetary'],
+    ['Frequency', 'Monetary', 'Total Quantity', 'Avg Order Value'],
     rf_model.feature_importances_,
-    color=['#636EFA', '#EF553B']
+    color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA']
 )
 ax_fi.set_title('Gini Feature Importance (Churn Model)')
 ax_fi.set_xlabel('Importance Score')

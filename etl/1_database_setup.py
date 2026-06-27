@@ -44,8 +44,7 @@ df = df.rename(columns={
     'OrderID':       'InvoiceNo',
     'Date':          'InvoiceDate',
     'OrderDate':     'InvoiceDate',
-    'Price':         'UnitPrice',
-    'TotalAmount':   'UnitPrice',
+    'TotalAmount':   'TotalSpend', 
     'CustomerNo':    'CustomerID',
     'Customer ID':   'CustomerID'
 })
@@ -61,8 +60,8 @@ if 'Quantity' in df.columns:
 else:
     df['Quantity'] = 1
 
-if 'UnitPrice' in df.columns:
-    df = df[df['UnitPrice'] > 0]
+if 'TotalSpend' in df.columns:
+    df = df[df['TotalSpend'] > 0]
 
 df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate']).dt.strftime('%Y-%m-%d %H:%M:%S')
 df['CustomerID']  = df['CustomerID'].astype(str)
@@ -72,7 +71,7 @@ print(f"   Clean rows remaining: {len(df)}")
 print(f"💾 [3/4] Saving database to: {DB_PATH}")
 conn = sqlite3.connect(DB_PATH)
 print("⏳ [4/4] Writing to 'raw_transactions' table...")
-df_final = df[['InvoiceNo', 'InvoiceDate', 'CustomerID', 'UnitPrice', 'Quantity']]
+df_final = df[['InvoiceNo', 'InvoiceDate', 'CustomerID', 'TotalSpend', 'Quantity']]
 df_final.to_sql("raw_transactions", conn, if_exists="replace", index=False)
 
 cursor = conn.cursor()

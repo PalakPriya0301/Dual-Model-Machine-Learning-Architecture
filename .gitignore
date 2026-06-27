@@ -1,0 +1,5 @@
+# Ignore raw datasets and data folder
+data/
+*.csv
+*.xlsx
+*.xls

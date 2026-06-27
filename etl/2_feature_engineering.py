@@ -3,17 +3,15 @@ import sqlite3
 import sys
 import os
 
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))       
 ROOT_DIR   = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))  
 DB_PATH    = os.path.join(ROOT_DIR, "app", "enterprise_crm.db")
-
 
 print("⏳ [1/4] Loading raw transactions from database...")
 print(f"   DB path: {DB_PATH}")
 
 if not os.path.exists(DB_PATH):
-    print(f"❌ ERROR: Database not found at {DB_PATH}")
+    print(f" ERROR: Database not found at {DB_PATH}")
     print("   Did you run etl/1_database_setup.py first?")
     sys.exit()
 
@@ -21,7 +19,7 @@ try:
     conn = sqlite3.connect(DB_PATH)
     df   = pd.read_sql("SELECT * FROM raw_transactions", conn)
 except Exception as e:
-    print(f"❌ ERROR: Could not read database. Details: {e}")
+    print(f"ERROR: Could not read database. Details: {e}")
     sys.exit()
 
 
@@ -29,28 +27,26 @@ print("⚙️ [2/4] Engineering Enterprise RFM Features...")
 
 df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
 
-if 'Quantity' in df.columns and 'UnitPrice' in df.columns:
-    df['TotalSpend'] = df['Quantity'] * df['UnitPrice']
-elif 'UnitPrice' in df.columns:
-    df['TotalSpend'] = df['UnitPrice']
-else:
-    print("❌ ERROR: Missing pricing columns in the database!")
+if 'TotalSpend' not in df.columns:
+    print("ERROR: 'TotalSpend' missing! Please re-run 1_database_setup.py first.")
     sys.exit()
-
 
 current_date = df['InvoiceDate'].max()
 
 df_rfm = df.groupby('CustomerID').agg({
     'InvoiceDate': lambda x: (current_date - x.max()).days,  # Recency
-    'InvoiceNo':   'nunique',                                 # Frequency
-    'TotalSpend':  'sum'                                      # Monetary
+    'InvoiceNo':   'nunique',                                # Frequency
+    'TotalSpend':  'sum',                                    # Monetary
+    'Quantity':    'sum'                                     # Total Volume
 }).reset_index()
 
-df_rfm.columns = ['CustomerID', 'Recency', 'Frequency', 'Monetary']
+df_rfm.columns = ['CustomerID', 'Recency', 'Frequency', 'Monetary', 'TotalQuantity']
+
+
+df_rfm['AvgOrderValue'] = df_rfm['Monetary'] / df_rfm['Frequency']
 
 
 print("🏷️ [3/4] Generating AI Training Labels (Churn)...")
-
 
 churn_threshold = df_rfm['Recency'].quantile(0.70)
 df_rfm['Churn_Label'] = (df_rfm['Recency'] > churn_threshold).astype(int)
