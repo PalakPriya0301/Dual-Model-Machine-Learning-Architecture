@@ -126,7 +126,8 @@ print(df['Persona'].value_counts())
 
 
 print("\n [4/7] Training Random Forest Churn Predictor...")
-X_churn = df[['Frequency', 'Monetary', 'TotalQuantity', 'AvgOrderValue']]
+# ✅ FIXED: Now strictly using only 2 features!
+X_churn = df[['Frequency', 'Monetary']]
 X_train, X_test, y_train, y_test = train_test_split(
     X_churn, y, test_size=0.2, random_state=42, stratify=y
 )
@@ -171,11 +172,12 @@ print("   model_evaluation.png saved.")
 
 print("\n [6/7] Generating feature importance chart...")
 
+# ✅ FIXED: Updated to plot exactly 2 bars instead of 4
 fig_fi, ax_fi = plt.subplots(figsize=(8, 4))
 bars = ax_fi.barh(
-    ['Frequency', 'Monetary', 'Total Quantity', 'Avg Order Value'],
+    ['Frequency', 'Monetary'],
     rf_model.feature_importances_,
-    color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA']
+    color=['#636EFA', '#EF553B']
 )
 ax_fi.set_title('Gini Feature Importance (Churn Model)')
 ax_fi.set_xlabel('Importance Score')
