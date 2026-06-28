@@ -24,7 +24,7 @@ label_map     = st.session_state['label_map']
 # ── INPUTS ────────────────────────────────────────────────────
 
 st.markdown("### 📝 Input Customer Metrics")
-col1, col2, col3 = st.columns(4)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     recency       = st.number_input("Recency (Days)", min_value=0, max_value=365, value=184)
