@@ -7,3 +7,5 @@ shap
 joblib
 python-dotenv
 openpyxl
+matplotlib
+Pillow

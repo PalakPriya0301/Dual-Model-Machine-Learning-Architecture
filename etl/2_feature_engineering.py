@@ -1,64 +1,90 @@
-import pandas as pd
+import logging
+import os
 import sqlite3
 import sys
-import os
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))       
-ROOT_DIR   = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))  
-DB_PATH    = os.path.join(ROOT_DIR, "app", "enterprise_crm.db")
+import pandas as pd
 
-print("⏳ [1/4] Loading raw transactions from database...")
-print(f"   DB path: {DB_PATH}")
-
-if not os.path.exists(DB_PATH):
-    print(f" ERROR: Database not found at {DB_PATH}")
-    print("   Did you run etl/1_database_setup.py first?")
-    sys.exit()
-
-try:
-    conn = sqlite3.connect(DB_PATH)
-    df   = pd.read_sql("SELECT * FROM raw_transactions", conn)
-except Exception as e:
-    print(f"ERROR: Could not read database. Details: {e}")
-    sys.exit()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+log = logging.getLogger(__name__)
 
 
-print("⚙️ [2/4] Engineering Enterprise RFM Features...")
+def run():
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    ROOT_DIR   = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+    DB_PATH    = os.path.join(ROOT_DIR, "app", "enterprise_crm.db")
 
-df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+    log.info("[1/4] Loading raw transactions from database: %s", DB_PATH)
 
-if 'TotalSpend' not in df.columns:
-    print("ERROR: 'TotalSpend' missing! Please re-run 1_database_setup.py first.")
-    sys.exit()
+    if not os.path.exists(DB_PATH):
+        raise FileNotFoundError(
+            f"Database not found at {DB_PATH}. "
+            "Did you run etl/1_database_setup.py first?"
+        )
 
-current_date = df['InvoiceDate'].max()
+    with sqlite3.connect(DB_PATH) as conn:
 
-df_rfm = df.groupby('CustomerID').agg({
-    'InvoiceDate': lambda x: (current_date - x.max()).days,  # Recency
-    'InvoiceNo':   'nunique',                                # Frequency
-    'TotalSpend':  'sum',                                    # Monetary
-    'Quantity':    'sum'                                     # Total Volume
-}).reset_index()
+        try:
+            df = pd.read_sql("SELECT * FROM raw_transactions", conn)
+        except Exception as e:
+            raise RuntimeError(f"Could not read database: {e}") from e
 
-df_rfm.columns = ['CustomerID', 'Recency', 'Frequency', 'Monetary', 'TotalQuantity']
+        log.info("[2/4] Engineering Enterprise RFM Features...")
+
+        df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
+
+        if "TotalSpend" not in df.columns:
+            raise ValueError("'TotalSpend' missing. Re-run 1_database_setup.py first.")
+
+        current_date = df["InvoiceDate"].max()
+
+        df_rfm = df.groupby("CustomerID").agg(
+            Recency=("InvoiceDate", lambda x: (current_date - x.max()).days),
+            Frequency=("InvoiceNo", "nunique"),   # FIX: nunique on InvoiceNo, not CustomerID
+            Monetary=("TotalSpend", "sum"),
+            TotalQuantity=("Quantity", "sum"),
+        ).reset_index()
+
+        df_rfm["AvgOrderValue"] = df_rfm["Monetary"] / df_rfm["Frequency"]
+
+      
+
+        log.info("[3/4] Generating AI Training Labels (Churn)...")
+
+        for pct in [0.60, 0.70, 0.80]:
+            threshold = df_rfm["Recency"].quantile(pct)
+            churned   = (df_rfm["Recency"] > threshold).sum()
+            loyal     = len(df_rfm) - churned
+            log.info(
+                "  Threshold @ %.0f%%ile = %.0f days → Churned: %d | Loyal: %d",
+                pct * 100, threshold, churned, loyal,
+            )
+
+        churn_threshold     = df_rfm["Recency"].quantile(0.70)
+        df_rfm["Churn_Label"] = (df_rfm["Recency"] > churn_threshold).astype(int)
+
+        log.info(
+            "Selected threshold (70th pct): %.0f days — Label split: %s",
+            churn_threshold,
+            df_rfm["Churn_Label"].value_counts().to_dict(),
+        )
+
+        log.info("[4/4] Saving engineered features to database...")
+        df_rfm.to_sql("customer_features", conn, if_exists="replace", index=False)
+
+    log.info("=" * 60)
+    log.info("SUCCESS: Feature Engineering complete!")
+    log.info("%d customer profiles saved to: %s", len(df_rfm), DB_PATH)
+    log.info("=" * 60)
 
 
-df_rfm['AvgOrderValue'] = df_rfm['Monetary'] / df_rfm['Frequency']
-
-
-print("🏷️ [3/4] Generating AI Training Labels (Churn)...")
-
-churn_threshold = df_rfm['Recency'].quantile(0.70)
-df_rfm['Churn_Label'] = (df_rfm['Recency'] > churn_threshold).astype(int)
-
-print(f"   Churn threshold (Recency): {churn_threshold:.0f} days")
-print(f"   Label split (0=Loyal, 1=Churned): {df_rfm['Churn_Label'].value_counts().to_dict()}")
-
-print("💾 [4/4] Saving engineered features to database...")
-df_rfm.to_sql("customer_features", conn, if_exists="replace", index=False)
-conn.close()
-
-print("=" * 60)
-print("✅ SUCCESS: Feature Engineering complete! Data is ready for the AI.")
-print(f"   {len(df_rfm)} customer profiles saved to: {DB_PATH}")
-print("=" * 60)
+if __name__ == "__main__":
+    try:
+        run()
+    except Exception as e:
+        log.error("Feature engineering failed: %s", e)
+        sys.exit(1)

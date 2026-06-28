@@ -3,45 +3,43 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import shap
-import joblib
 
 st.set_page_config(page_title="Predict New Customer", layout="wide")
 
 st.title("🔮 Predict Customer Persona & Churn Risk")
-st.write("Enter metrics below to classify a new customer and calculate their churn probability.")
+st.write("Enter a customer's metrics below to classify their segment and calculate churn probability.")
 
-
-_required_keys = ['historical_model', 'churn_model', 'scaler', 'label_map']
+_required_keys = ["historical_model", "churn_model", "scaler", "label_map"]
 if any(k not in st.session_state for k in _required_keys):
     st.error("⚠️ Models not loaded. Please go to the **Home** page first to initialise the system.")
     st.stop()
 
-persona_model = st.session_state['historical_model']
-churn_model   = st.session_state['churn_model']
-scaler        = st.session_state['scaler']
-label_map     = st.session_state['label_map']
+persona_model = st.session_state["historical_model"]
+churn_model   = st.session_state["churn_model"]
+scaler        = st.session_state["scaler"]
+label_map     = st.session_state["label_map"]
 
 # ── INPUTS ────────────────────────────────────────────────────
-
 st.markdown("### 📝 Input Customer Metrics")
+st.caption("Tip: Recency = days since last purchase. Frequency = number of unique orders. Monetary = total lifetime spend.")
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    recency       = st.number_input("Recency (Days)", min_value=0, max_value=365, value=184)
+    recency   = st.number_input("Recency (Days since last purchase)", min_value=0, max_value=730, value=90,
+                                help="0 = bought today. Higher = more dormant.")
 with col2:
-    frequency     = st.number_input("Frequency (Orders)", min_value=1, max_value=100, value=11)
+    frequency = st.number_input("Frequency (Number of unique orders)", min_value=1, max_value=500, value=5,
+                                help="Total number of distinct invoices/orders placed.")
 with col3:
-    monetary      = st.number_input("Monetary (Spend $)", min_value=0.0, max_value=10000.0, value=5563.56, format="%.2f")
+    monetary  = st.number_input("Monetary (Total spend $)", min_value=0.0, max_value=50000.0, value=500.0, format="%.2f",
+                                help="Sum of all order values across the customer's lifetime.")
 
-# 1. Input for the Persona Model (K-Means expects Recency, Frequency, Monetary)
-input_data = pd.DataFrame([[recency, frequency, monetary]], columns=['Recency', 'Frequency', 'Monetary'])
-
-# 2. Input for the Churn Model (Random Forest expects EXACTLY 2 features: Frequency, Monetary)
-churn_input_data = pd.DataFrame([[frequency, monetary]], columns=['Frequency', 'Monetary'])
+input_data       = pd.DataFrame([[recency, frequency, monetary]], columns=["Recency", "Frequency", "Monetary"])
+churn_input_data = pd.DataFrame([[frequency, monetary]],          columns=["Frequency", "Monetary"])
 
 st.markdown("---")
 
-st.markdown("---")
 if st.button("🚀 Run AI Diagnosis", type="primary", use_container_width=True):
 
     input_scaled       = scaler.transform(input_data)
@@ -68,7 +66,7 @@ if st.button("🚀 Run AI Diagnosis", type="primary", use_container_width=True):
 
     st.markdown("---")
     st.subheader("🧠 Model Decision Logic (SHAP)")
-    st.caption("Red = increases churn risk | Blue = reduces churn risk")
+    st.caption("Red = pushes churn probability higher | Blue = pushes churn probability lower")
 
     try:
         explainer       = shap.TreeExplainer(churn_model)
@@ -82,21 +80,21 @@ if st.button("🚀 Run AI Diagnosis", type="primary", use_container_width=True):
             sv = np.array(shap_values_raw).flatten()
 
         shap_df = pd.DataFrame({
-            'Feature': ['Frequency', 'Monetary'],
-            'Impact':  sv
-        }).sort_values(by='Impact')
+            "Feature": ["Frequency", "Monetary"],
+            "Impact":  sv,
+        }).sort_values(by="Impact")
 
-        shap_df['Color'] = ['#EF553B' if x > 0 else '#636EFA' for x in shap_df['Impact']]
+        shap_df["Color"] = ["#EF553B" if x > 0 else "#636EFA" for x in shap_df["Impact"]]
 
         fig_shap = px.bar(
-            shap_df, x='Impact', y='Feature', orientation='h',
-            color='Color', color_discrete_map="identity",
-            labels={'Impact': 'Impact on Churn Probability'}
+            shap_df, x="Impact", y="Feature", orientation="h",
+            color="Color", color_discrete_map="identity",
+            labels={"Impact": "Impact on Churn Probability"},
         )
         fig_shap.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            showlegend=False
+            showlegend=False,
         )
         st.plotly_chart(fig_shap, use_container_width=True)
 
