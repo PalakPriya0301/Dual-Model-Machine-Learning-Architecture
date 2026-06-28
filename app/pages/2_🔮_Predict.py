@@ -33,15 +33,13 @@ with col2:
 with col3:
     monetary      = st.number_input("Monetary (Spend $)", min_value=0.0, max_value=10000.0, value=5563.56, format="%.2f")
 
-
-
-avg_order_value = monetary / frequency if frequency > 0 else 0
-
-
+# 1. Input for the Persona Model (K-Means expects Recency, Frequency, Monetary)
 input_data = pd.DataFrame([[recency, frequency, monetary]], columns=['Recency', 'Frequency', 'Monetary'])
 
-churn_input_data = pd.DataFrame([[frequency, monetary, avg_order_value]], 
-                                columns=['Frequency', 'Monetary', 'AvgOrderValue'])
+# 2. Input for the Churn Model (Random Forest expects EXACTLY 2 features: Frequency, Monetary)
+churn_input_data = pd.DataFrame([[frequency, monetary]], columns=['Frequency', 'Monetary'])
+
+st.markdown("---")
 
 st.markdown("---")
 if st.button("🚀 Run AI Diagnosis", type="primary", use_container_width=True):
