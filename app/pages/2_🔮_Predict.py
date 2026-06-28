@@ -41,7 +41,7 @@ avg_order_value = monetary / frequency if frequency > 0 else 0
 input_data = pd.DataFrame([[recency, frequency, monetary]], columns=['Recency', 'Frequency', 'Monetary'])
 
 churn_input_data = pd.DataFrame([[frequency, monetary, avg_order_value]], 
-                                columns=['Frequency', 'Monetary', 'TotalQuantity', 'AvgOrderValue'])
+                                columns=['Frequency', 'Monetary', 'AvgOrderValue'])
 
 st.markdown("---")
 if st.button("🚀 Run AI Diagnosis", type="primary", use_container_width=True):
