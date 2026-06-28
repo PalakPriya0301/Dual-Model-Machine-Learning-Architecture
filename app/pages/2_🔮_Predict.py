@@ -24,7 +24,7 @@ label_map     = st.session_state['label_map']
 # ── INPUTS ────────────────────────────────────────────────────
 
 st.markdown("### 📝 Input Customer Metrics")
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3 = st.columns(4)
 
 with col1:
     recency       = st.number_input("Recency (Days)", min_value=0, max_value=365, value=184)
@@ -32,8 +32,7 @@ with col2:
     frequency     = st.number_input("Frequency (Orders)", min_value=1, max_value=100, value=11)
 with col3:
     monetary      = st.number_input("Monetary (Spend $)", min_value=0.0, max_value=10000.0, value=5563.56, format="%.2f")
-with col4:
-    total_quantity = st.number_input("Total Quantity (Items)", min_value=1, max_value=500, value=45)
+
 
 
 avg_order_value = monetary / frequency if frequency > 0 else 0
@@ -41,7 +40,7 @@ avg_order_value = monetary / frequency if frequency > 0 else 0
 
 input_data = pd.DataFrame([[recency, frequency, monetary]], columns=['Recency', 'Frequency', 'Monetary'])
 
-churn_input_data = pd.DataFrame([[frequency, monetary, total_quantity, avg_order_value]], 
+churn_input_data = pd.DataFrame([[frequency, monetary, avg_order_value]], 
                                 columns=['Frequency', 'Monetary', 'TotalQuantity', 'AvgOrderValue'])
 
 st.markdown("---")
