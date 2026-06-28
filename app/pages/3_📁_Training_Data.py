@@ -55,7 +55,7 @@ col3.metric("Avg Lifetime Spend", f"${df_historical['Monetary'].mean():,.2f}")
 st.markdown("---")
 
 
-st.markdown("### 🧠 AI-Scored Customer Profiles (The 'After')")
+st.markdown("### 🧠 AI-Scored Customer Profiles ")
 st.markdown("This is the final dataset after Unsupervised Clustering (Persona) and Supervised Classification (Churn).")
 
 st.dataframe(
