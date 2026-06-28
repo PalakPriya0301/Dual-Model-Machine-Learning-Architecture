@@ -71,18 +71,3 @@ st.download_button(
     mime="text/csv",
 )
 
-st.markdown("---")
-
-
-df_raw = load_raw_transactions()
-st.markdown("### 📂 Raw Transaction Sample")
-if df_raw is not None:
-    st.caption("Showing first 1,000 rows of the source dataset.")
-    st.dataframe(df_raw.head(20), use_container_width=True, hide_index=True)
-else:
-    
-    st.info(
-        "ℹ️ The raw transaction file (`Online Retail.xlsx`) is not available on the cloud deployment "
-        "as it exceeds GitHub's file size limits. To view it, clone the repository locally and place "
-        "the file in the `data/` directory."
-    )

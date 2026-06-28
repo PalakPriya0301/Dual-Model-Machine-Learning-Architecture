@@ -26,44 +26,32 @@ def _pkl(name):
 # ── SIDEBAR: MLOps Panel ──────────────────────────────────────
 st.sidebar.markdown("### 🔄 Enterprise MLOps")
 
-# FIX: Password-gate the batch sync so random visitors can't trigger it
-admin_pw = st.sidebar.text_input("Admin Password", type="password")
+if st.sidebar.button("Run Nightly Batch Sync", type="primary"):
+    python = sys.executable
+    step1  = os.path.join(ETL_DIR, "1_database_setup.py")
+    step2  = os.path.join(ETL_DIR, "2_feature_engineering.py")
 
-# Read expected password from Streamlit secrets (set ADMIN_PASSWORD in secrets.toml)
-try:
-    expected_pw = st.secrets["ADMIN_PASSWORD"]
-except Exception:
-    expected_pw = ""  # No secret configured — button stays hidden
+    steps  = [("Database Setup", step1), ("Feature Engineering", step2)]
+    failed = False
 
-if admin_pw and admin_pw == expected_pw:
-    if st.sidebar.button("Run Nightly Batch Sync", type="primary"):
-        python = sys.executable
-        step1  = os.path.join(ETL_DIR, "1_database_setup.py")
-        step2  = os.path.join(ETL_DIR, "2_feature_engineering.py")
+    for label, script in steps:
+        if not os.path.exists(script):
+            st.sidebar.error(f"Script not found: {script}")
+            failed = True
+            break  # stop immediately, don't run dependent step
 
-        steps  = [("Database Setup", step1), ("Feature Engineering", step2)]
-        failed = False
-
-        for label, script in steps:
-            if not os.path.exists(script):
-                st.sidebar.error(f"Script not found: {script}")
+        with st.spinner(f"Running {label}..."):
+            result = subprocess.run([python, script], capture_output=True, text=True)
+            if result.returncode != 0:
+                st.sidebar.error(f"{label} failed:\n{result.stderr}")
                 failed = True
-                break  # FIX: stop immediately, don't run dependent step
+                break  # break on first failure
 
-            with st.spinner(f"Running {label}..."):
-                result = subprocess.run([python, script], capture_output=True, text=True)
-                if result.returncode != 0:
-                    st.sidebar.error(f"{label} failed:\n{result.stderr}")
-                    failed = True
-                    break  # FIX: break on first failure
-
-        if not failed:
-            st.cache_data.clear()
-            st.cache_resource.clear()
-            st.sidebar.success("✅ Database synced with latest transactions!")
-            st.rerun()
-elif admin_pw and admin_pw != expected_pw:
-    st.sidebar.error("Incorrect password.")
+    if not failed:
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.sidebar.success("✅ Database synced with latest transactions!")
+        st.rerun()
 
 st.sidebar.markdown("---")
 

@@ -14,11 +14,6 @@ st.markdown(
 )
 
 
-st.info(
-    "ℹ️ This ETL module runs a **fresh K-Means clustering** on your uploaded data. "
-    "Results are not directly comparable to the main dashboard (which uses the pre-trained model) "
-    "but are fully valid for analysing your custom dataset independently."
-)
 
 
 def load_data(file):

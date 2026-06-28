@@ -45,14 +45,24 @@ if os.path.exists(metrics_path):
 
     st.markdown("")
     cv_col1, cv_col2 = st.columns(2)
+    st.markdown("")
+    cv_col1, cv_col2 = st.columns(2)
+    
+    cv_mean = m.get('cv_f1_mean')
+    cv_std = m.get('cv_f1_std')
+    baseline = m.get('baseline_f1_050')
+
+    cv_text = f"{cv_mean:.4f} ± {cv_std:.4f}" if cv_mean is not None and cv_std is not None else "—"
+    base_text = f"{baseline:.4f}" if baseline is not None else "—"
+
     cv_col1.metric(
         "5-Fold CV F1 (mean ± std)",
-        f"{m.get('cv_f1_mean', '—'):.4f} ± {m.get('cv_f1_std', '—'):.4f}",
+        cv_text,
         help="Cross-validation gives a more reliable estimate than a single train/test split.",
     )
     cv_col2.metric(
         "Baseline F1 (threshold 0.50)",
-        f"{m.get('baseline_f1_050', '—'):.4f}",
+        base_text,
         help="F1 at standard 0.50 threshold — lower than aggressive threshold because recall is not maximised.",
     )
     st.markdown("---")

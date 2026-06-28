@@ -51,12 +51,3 @@ fig_3d = px.scatter_3d(
 )
 fig_3d.update_layout(margin=dict(l=0, r=0, b=0, t=0), paper_bgcolor="rgba(0,0,0,0)")
 st.plotly_chart(fig_3d, use_container_width=True)
-st.markdown("### 📋 Persona Summary Statistics")
-summary = (
-    df.groupby("Persona")[["Recency", "Frequency", "Monetary"]]
-    .mean()
-    .round(2)
-    .rename(columns={"Recency": "Avg Recency (days)", "Frequency": "Avg Orders", "Monetary": "Avg Spend ($)"})
-)
-summary["Customer Count"] = df.groupby("Persona")["CustomerID"].count()
-st.dataframe(summary, use_container_width=True)
