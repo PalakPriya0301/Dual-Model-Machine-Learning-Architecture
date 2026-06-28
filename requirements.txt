@@ -6,6 +6,6 @@ plotly
 shap
 joblib
 python-dotenv
-openpyxl
 matplotlib
 Pillow
+openpyxl==3.1.2
