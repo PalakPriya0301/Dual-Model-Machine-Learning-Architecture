@@ -1,0 +1,50 @@
+[
+    {
+        "Model":"Random Forest",
+        "Accuracy":0.6744689374,
+        "Precision":0.4701723219,
+        "Recall":0.6812656086,
+        "F1":0.5563635937,
+        "ROC_AUC":0.7053133714
+    },
+    {
+        "Model":"Extra Trees",
+        "Accuracy":0.6321694864,
+        "Precision":0.3868814309,
+        "Recall":0.3892184821,
+        "F1":0.3880381728,
+        "ROC_AUC":0.5986390961
+    },
+    {
+        "Model":"Decision Tree",
+        "Accuracy":0.6318148245,
+        "Precision":0.3845347034,
+        "Recall":0.3809320265,
+        "F1":0.3827098377,
+        "ROC_AUC":0.5621328894
+    },
+    {
+        "Model":"XGBoost",
+        "Accuracy":0.6908791248,
+        "Precision":0.4632228972,
+        "Recall":0.1998303427,
+        "F1":0.2790293671,
+        "ROC_AUC":0.7013781884
+    },
+    {
+        "Model":"Gradient Boosting",
+        "Accuracy":0.6988103861,
+        "Precision":0.4596034993,
+        "Recall":0.0300223913,
+        "F1":0.0561896593,
+        "ROC_AUC":0.7063264229
+    },
+    {
+        "Model":"Logistic Regression",
+        "Accuracy":0.7003901109,
+        "Precision":0.0,
+        "Recall":0.0,
+        "F1":0.0,
+        "ROC_AUC":0.7062390259
+    }
+]
