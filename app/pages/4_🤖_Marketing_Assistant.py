@@ -25,7 +25,7 @@ if "historical_df" not in st.session_state:
 
 st.markdown("---")
 
-search_id = st.text_input("🔍 Enter Customer ID (e.g., 17850):")
+search_id = st.text_input("🔍 Enter Customer ID :")
 
 if st.button("Fetch Live Data", type="primary"):
     if "active_customer" in st.session_state:

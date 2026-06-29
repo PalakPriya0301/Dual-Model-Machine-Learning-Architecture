@@ -43,32 +43,6 @@ if os.path.exists(metrics_path):
     c4.metric("F1 Score",      f"{m.get('f1_score', '—'):.1%}")
     c5.metric("ROC-AUC",       f"{m.get('roc_auc', '—'):.4f}")
 
-    st.markdown("")
-    cv_col1, cv_col2 = st.columns(2)
-    st.markdown("")
-    cv_col1, cv_col2 = st.columns(2)
-    
-    cv_mean = m.get('cv_f1_mean')
-    cv_std = m.get('cv_f1_std')
-    baseline = m.get('baseline_f1_050')
-
-    cv_text = f"{cv_mean:.4f} ± {cv_std:.4f}" if cv_mean is not None and cv_std is not None else "—"
-    base_text = f"{baseline:.4f}" if baseline is not None else "—"
-
-    cv_col1.metric(
-        "5-Fold CV F1 (mean ± std)",
-        cv_text,
-        help="Cross-validation gives a more reliable estimate than a single train/test split.",
-    )
-    cv_col2.metric(
-        "Baseline F1 (threshold 0.50)",
-        base_text,
-        help="F1 at standard 0.50 threshold — lower than aggressive threshold because recall is not maximised.",
-    )
-    st.markdown("---")
-else:
-    st.info("ℹ️ `metrics.json` not found. Run `models/3_model_training.py` to generate live metrics.")
-    st.markdown("---")
 
 # ── SECTION 1: K-MEANS ───────────────────────────────────────
 st.header("1. Customer Segmentation (Unsupervised Learning)")
@@ -139,18 +113,6 @@ if path:
     st.image(Image.open(path), caption="Gini Feature Importance — Churn Prediction Model", use_container_width=True)
 else:
     st.info(_missing_msg)
-
-
-with st.expander("🔬 Why are Recency, TotalQuantity, and AvgOrderValue not in the churn model?"):
-    st.markdown("""
-    | Feature | Status | Reason |
-    |---|---|---|
-    | **Recency** | ❌ Excluded | **Data leakage** — the churn label is derived directly from Recency (customers beyond 70th percentile are labelled churned). Including it gives the model near-perfect accuracy for a trivial reason. |
-    | **TotalQuantity** | ❌ Excluded | Pearson correlation with Frequency > 0.90 — it adds no marginal predictive information beyond what Frequency already captures. |
-    | **AvgOrderValue** | ❌ Excluded | Low Gini importance in feature selection trials. Spend per order adds little signal beyond total Monetary value when churn is the target. |
-    | **Frequency** | ✅ Used | How often a customer buys is a strong independent signal of engagement. |
-    | **Monetary** | ✅ Used | Total lifetime value captures the economic relationship with the customer. |
-    """)
 
 # ── SECTION 4: CHURN LABEL METHODOLOGY ──────────────────────
 st.markdown("---")
