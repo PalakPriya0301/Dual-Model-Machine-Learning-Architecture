@@ -1,0 +1,102 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import shap
+
+st.set_page_config(page_title="Predict New Customer", layout="wide")
+
+st.title("🔮 Predict Customer Persona & Churn Risk")
+st.write("Enter a customer's metrics below to classify their segment and calculate churn probability.")
+
+_required_keys = ["historical_model", "churn_model", "scaler", "label_map"]
+if any(k not in st.session_state for k in _required_keys):
+    st.error("⚠️ Models not loaded. Please go to the **Home** page first to initialise the system.")
+    st.stop()
+
+persona_model = st.session_state["historical_model"]
+churn_model   = st.session_state["churn_model"]
+scaler        = st.session_state["scaler"]
+label_map     = st.session_state["label_map"]
+
+# ── INPUTS ────────────────────────────────────────────────────
+st.markdown("### 📝 Input Customer Metrics")
+st.caption("Tip: Recency = days since last purchase. Frequency = number of unique orders. Monetary = total lifetime spend.")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    recency   = st.number_input("Recency (Days since last purchase)", min_value=0, max_value=730, value=90,
+                                help="0 = bought today. Higher = more dormant.")
+with col2:
+    frequency = st.number_input("Frequency (Number of unique orders)", min_value=1, max_value=500, value=5,
+                                help="Total number of distinct invoices/orders placed.")
+with col3:
+    monetary  = st.number_input("Monetary (Total spend $)", min_value=0.0, max_value=50000.0, value=500.0, format="%.2f",
+                                help="Sum of all order values across the customer's lifetime.")
+
+input_data       = pd.DataFrame([[recency, frequency, monetary]], columns=["Recency", "Frequency", "Monetary"])
+churn_input_data = pd.DataFrame([[frequency, monetary]],          columns=["Frequency", "Monetary"])
+
+st.markdown("---")
+
+if st.button("🚀 Run AI Diagnosis", type="primary", use_container_width=True):
+
+    input_scaled       = scaler.transform(input_data)
+    cluster_idx        = int(persona_model.predict(input_scaled)[0])
+    persona_prediction = label_map.get(cluster_idx, f"Unknown Cluster {cluster_idx}")
+
+    churn_proba = churn_model.predict_proba(churn_input_data)[0][1] * 100
+
+    st.markdown("### 🔍 Diagnosis Results")
+    res_col1, res_col2 = st.columns(2)
+
+    with res_col1:
+        st.success(f"**Predicted Segment:**\n## {persona_prediction}")
+
+    with res_col2:
+        st.markdown(f"**Churn Risk:**\n## {churn_proba:.1f}%")
+        if churn_proba > 50:
+            st.error("🚨 CRITICAL: High risk of abandonment.")
+        elif churn_proba > 35:
+            st.warning("⚠️ MODERATE: Exceeds 35% action threshold. Monitor behaviour.")
+        else:
+            st.info("✅ LOW: Customer is loyal.")
+        st.progress(min(int(churn_proba), 100))
+
+    st.markdown("---")
+    st.subheader("🧠 Model Decision Logic (SHAP)")
+    st.caption("Red = pushes churn probability higher | Blue = pushes churn probability lower")
+
+    try:
+        explainer       = shap.TreeExplainer(churn_model)
+        shap_values_raw = explainer.shap_values(churn_input_data)
+
+        if isinstance(shap_values_raw, list):
+            sv = np.array(shap_values_raw[1]).flatten()
+        elif len(shap_values_raw.shape) == 3:
+            sv = shap_values_raw[0, :, 1].flatten()
+        else:
+            sv = np.array(shap_values_raw).flatten()
+
+        shap_df = pd.DataFrame({
+            "Feature": ["Frequency", "Monetary"],
+            "Impact":  sv,
+        }).sort_values(by="Impact")
+
+        shap_df["Color"] = ["#EF553B" if x > 0 else "#636EFA" for x in shap_df["Impact"]]
+
+        fig_shap = px.bar(
+            shap_df, x="Impact", y="Feature", orientation="h",
+            color="Color", color_discrete_map="identity",
+            labels={"Impact": "Impact on Churn Probability"},
+        )
+        fig_shap.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            showlegend=False,
+        )
+        st.plotly_chart(fig_shap, use_container_width=True)
+
+    except Exception as e:
+        st.warning(f"SHAP visualisation unavailable: {e}")
