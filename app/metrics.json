@@ -1,10 +1,18 @@
 {
-  "best_model_architecture": "Random Forest",
-  "threshold_aggressive": 0.35,
-  "accuracy": 0.5037,
-  "precision": 0.3693,
-  "recall": 0.9273,
-  "f1_score": 0.5283,
-  "roc_auc": 0.7025,
-  "n_customers": 38772
+    "best_model_architecture": "Random Forest",
+    "decision_threshold": 0.35,
+    "n_customers": 38772,
+    "clustering_benchmarks": {
+        "K-Means": 0.4843,
+        "Agglomerative": 0.4816,
+        "Gaussian Mixture": 0.4502,
+        "DBSCAN": 0.3731
+    },
+    "performance": {
+        "accuracy": 0.5037,
+        "precision": 0.3693,
+        "recall": 0.9273,
+        "f1_score": 0.5283,
+        "roc_auc": 0.7025
+    }
 }
