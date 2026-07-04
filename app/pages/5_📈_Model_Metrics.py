@@ -26,22 +26,32 @@ def _img(filename):
 
 _missing_msg = "⚠️ Chart not found. Run `models/3_model_training.py` locally and push PNGs to GitHub."
 
-# ── LIVE METRICS ─────────────────────────────────────────────
-
 metrics_path = os.path.join(APP_DIR, "metrics.json")
+
 if os.path.exists(metrics_path):
-    with open(metrics_path) as f:
+    with open(metrics_path, "r") as f:
         m = json.load(f)
 
     st.markdown("### 🎯 Live Model Performance (from last training run)")
-    st.caption(f"Based on {m.get('n_customers', '—'):,} customers | Aggressive threshold = {m.get('threshold_aggressive', 0.35)}")
+    
+    
+    threshold = m.get('decision_threshold', 0.35)
+    n_cust = m.get('n_customers', 0)
+    st.caption(f"Based on {n_cust:,} customers | Aggressive threshold = {threshold}")
+
+   
+    perf = m.get('performance', {})
 
     c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("Accuracy",      f"{m.get('accuracy', '—'):.1%}")
-    c2.metric("Precision",     f"{m.get('precision', '—'):.1%}")
-    c3.metric("Recall",        f"{m.get('recall', '—'):.1%}")
-    c4.metric("F1 Score",      f"{m.get('f1_score', '—'):.1%}")
-    c5.metric("ROC-AUC",       f"{m.get('roc_auc', '—'):.4f}")
+    c1.metric("Accuracy",      f"{perf.get('accuracy', 0):.1%}")
+    c2.metric("Precision",     f"{perf.get('precision', 0):.1%}")
+    c3.metric("Recall",        f"{perf.get('recall', 0):.1%}")
+    c4.metric("F1 Score",      f"{perf.get('f1_score', 0):.1%}")
+    c5.metric("ROC-AUC",       f"{perf.get('roc_auc', 0):.4f}")
+    
+else:
+    # Safety net: Shows a warning instead of crashing the app
+    st.warning("⚠️ `metrics.json` not found! Please run `python models/3_model_training.py` in your terminal to generate the live metrics.")
 
 
 # ── SECTION 1: K-MEANS ───────────────────────────────────────
