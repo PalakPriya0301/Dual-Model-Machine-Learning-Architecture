@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import plotly.express as px
 
 st.set_page_config(page_title="Dashboard", layout="wide")
@@ -19,7 +20,7 @@ with st.expander("📖 What is RFM? (click to expand)"):
     |---|---|---|
     | **Recency** | Days since last purchase | Low (bought recently) |
     | **Frequency** | Number of unique orders | High (buys often) |
-    | **Monetary** | Total spend (£/\$) | High (spends more) |
+    | **Monetary** | Total spend (£/$) | High (spends more) |
 
     Customers are clustered into 3 personas using **K-Means** on these three dimensions.
     The 3D chart below shows how well-separated the clusters are in RFM space.
@@ -30,11 +31,24 @@ st.markdown("---")
 selected_persona = st.selectbox("Filter by Persona:", ["All"] + list(df["Persona"].unique()))
 filtered_df = df if selected_persona == "All" else df[df["Persona"] == selected_persona]
 
+
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Customers",    f"{len(filtered_df):,}")
 col2.metric("Avg Spend",    f"${filtered_df['Monetary'].mean():,.2f}")
 col3.metric("Avg Recency",  f"{filtered_df['Recency'].mean():.0f} days")
 col4.metric("Avg Orders",   f"{filtered_df['Frequency'].mean():.1f}")
+
+st.markdown("---")
+
+st.subheader("👥 Customer Distribution")
+
+segment_counts = df['Persona'].value_counts().reset_index()
+segment_counts.columns = ['Customer Segment', 'Total Customers']
+
+st.dataframe(segment_counts, use_container_width=True, hide_index=True)
+
+st.markdown("---")
+
 
 st.markdown("### 🌐 Mathematical Cluster Separation (3D RFM Space)")
 st.caption("Each dot is one customer. Axes = Recency (days), Frequency (orders), Monetary (spend $)")
