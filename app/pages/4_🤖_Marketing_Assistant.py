@@ -73,26 +73,29 @@ if "active_customer" in st.session_state:
 
     if "Sleeper" in persona:
         subject = "We miss you! A 20% discount awaits 🎁"
-        body    = (
-            f"Hi,\n\nIt's been {recency} days since your last purchase. "
-            "We'd love to see you back! Use code WINBACK20 for 20% off your next order.\n\nBest regards,\nThe Team"
+        body = (
+        f"Hi,\n\nIt's been {recency} days since your last purchase. "
+        "We'd love to see you back! Use code WINBACK20 for 20% off your next order.\n\n"
+        "Best regards,\n\nThe Team"
         )
     elif "Top-Tier" in persona:
         subject = "VIP Early Access: New Collection inside 🌟"
-        body    = (
-            "Hi,\n\nAs one of our most valued customers, you've earned exclusive early access "
-            "to our latest collection — 24 hours before everyone else.\n\nThank you for your loyalty.\nThe Team"
+        body = (
+        "Hi,\n\nAs one of our most valued customers, you've earned exclusive early access "
+        "to our latest collection — 24 hours before everyone else.\n\n"
+        "Thank you for your loyalty.\n\nBest regards,\n\nThe Team"
         )
     else:
         subject = "Thinking of leveling up? Check out our Gold Tier 🥇"
-        body    = (
-            f"Hi,\n\nThanks for your {int(customer['Frequency'])} purchases! "
-            "You're almost at VIP status. One more order unlocks exclusive Gold Tier benefits.\n\nThe Team"
+        body = (
+        f"Hi,\n\nThanks for your {int(customer['Frequency'])} purchases! "
+        "You're almost at VIP status. One more order unlocks exclusive Gold Tier benefits.\n\n"
+        "Best regards,\n\nThe Team"
         )
 
 
     st.markdown("#### ✉️ Email Draft Preview")
-    st.info(f"**To:** {target_inbox or '(enter email above)'}\n\n**Subject:** {subject}\n\n**Body:**\n\n{body}")
+    st.info(f"**Subject:** {subject}\n\n**Body:**\n\n{body}")
 
     
     if st.button("📤 Confirm & Send Email"):
