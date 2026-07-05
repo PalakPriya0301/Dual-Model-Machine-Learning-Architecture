@@ -72,6 +72,7 @@ if uploaded_file:
             st.dataframe(rfm, use_container_width=True)
 
             # Viz
+            st.write("### 3D Visualization")
             fig = px.scatter_3d(rfm, x="Recency", y="Frequency", z="Monetary", color="Assigned_Persona")
             st.plotly_chart(fig, use_container_width=True)
             
