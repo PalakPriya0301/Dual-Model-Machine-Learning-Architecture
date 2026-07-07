@@ -23,38 +23,6 @@ def _pkl(name):
     return os.path.join(BASE_DIR, name)
 
 
-# ── SIDEBAR: MLOps Panel ──────────────────────────────────────
-st.sidebar.markdown("### 🔄 Enterprise MLOps")
-
-if st.sidebar.button("Run Nightly Batch Sync", type="primary"):
-    python = sys.executable
-    step1  = os.path.join(ETL_DIR, "1_database_setup.py")
-    step2  = os.path.join(ETL_DIR, "2_feature_engineering.py")
-
-    steps  = [("Database Setup", step1), ("Feature Engineering", step2)]
-    failed = False
-
-    for label, script in steps:
-        if not os.path.exists(script):
-            st.sidebar.error(f"Script not found: {script}")
-            failed = True
-            break  # stop immediately, don't run dependent step
-
-        with st.spinner(f"Running {label}..."):
-            result = subprocess.run([python, script], capture_output=True, text=True)
-            if result.returncode != 0:
-                st.sidebar.error(f"{label} failed:\n{result.stderr}")
-                failed = True
-                break  # break on first failure
-
-    if not failed:
-        st.cache_data.clear()
-        st.cache_resource.clear()
-        st.sidebar.success("✅ Database synced with latest transactions!")
-        st.rerun()
-
-st.sidebar.markdown("---")
-
 # ── HOME PAGE ─────────────────────────────────────────────────
 st.title("🏢 Welcome to the Enterprise Segmentation Portal")
 st.markdown("""
@@ -68,9 +36,10 @@ This platform provides end-to-end customer intelligence using Machine Learning.
 **👈 Please select a module from the sidebar to begin:**
 * **📊 Dashboard:** View historical segmentation analytics.
 * **🔮 Predict:** Input real-time metrics to classify a new customer & calculate churn risk.
-* **🚀 ETL:** Upload custom transaction logs for dynamic clustering.
+* **📁 Training Data:** Explore the complete database archive and view customer profiles.
 * **🤖 Marketing Assistant:** Look up users and automatically dispatch targeted emails.
 * **📈 Model Metrics:** Understand the AI architecture powering this platform.
+* **🚀 ETL:** Upload custom transaction logs for dynamic clustering.
 """)
 
 # ── PRE-BOOT CHECK ────────────────────────────────────────────

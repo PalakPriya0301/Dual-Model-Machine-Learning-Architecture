@@ -5,7 +5,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Training Data Archive", page_icon="📁", layout="wide")
 
-st.title("📁 AI Training Data Archive")
+st.title("📁 Training Data Archive")
 st.markdown("""
 This module provides complete transparency into the data pipeline.
 Below you can view the resulting **AI-Scored Customer Profiles**.
