@@ -21,6 +21,7 @@ The platform follows a modular, industry-standard data science pipeline distribu
 
 3. **Enterprise UI Dashboard (`app/`):** A production-ready Streamlit multi-page interface that surfaces customer health metrics, provides interactive single-customer inference, and connects to an automated email marketing delivery node.
 
+4.**Dynamic Data Ingestion & Live Clustering (`6_ETL.py`):** Enables users to upload custom datasets directly through the UI, dynamically executing real-time ETL processing, automated database updates, and live clustering on the fly.
 ---
 
 ## 📂 Project Structure
@@ -162,8 +163,7 @@ streamlit run app/Home.py
 ## 🔒 Security & Deployment Notes
 
 - **Secrets Management:** `SENDER_EMAIL` and `APP_PASSWORD` (Gmail SMTP credentials) are managed via Streamlit Secrets on cloud and a `.env` file locally. Neither is committed to version control.
-- **Admin Gate:** The Nightly Batch Sync feature on the Home page is protected by an `ADMIN_PASSWORD` secret — random visitors cannot trigger server-side pipeline execution.
-- **Raw Data:** `Online Retail.xlsx` is excluded from GitHub (file size). The compiled `.db` database and all `.pkl` model files are committed instead so the cloud deployment is fully functional without the source file.
+- **Raw Data:** `Online Retail.xlsx` is excluded from GitHub. The compiled `.db` database and all `.pkl` model files are committed instead so the cloud deployment is fully functional without the source file.
 
 ---
 
