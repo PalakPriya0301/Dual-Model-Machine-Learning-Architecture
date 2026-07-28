@@ -81,11 +81,11 @@ The platform follows a modular, industry-standard data science pipeline distribu
 
   | Feature | Decision | Reason |
   |---|---|---|
-  | Recency | ❌ Excluded | Data leakage — churn label is derived from Recency |
-  | TotalQuantity | ❌ Excluded | Pearson correlation with Frequency > 0.90; no marginal gain |
-  | AvgOrderValue | ❌ Excluded | Low Gini importance in feature selection trials |
-  | Frequency | ✅ Used | Strong independent signal of customer engagement |
-  | Monetary | ✅ Used | Captures economic relationship with the customer |
+  | Recency | Excluded | Data leakage — churn label is derived from Recency |
+  | TotalQuantity | Excluded | Pearson correlation with Frequency > 0.90; no marginal gain |
+  | AvgOrderValue | Excluded | Low Gini importance in feature selection trials |
+  | Frequency | Used | Strong independent signal of customer engagement |
+  | Monetary | Used | Captures economic relationship with the customer |
 
 - **Churn Label Definition:** Customers whose Recency exceeds the **70th percentile** are labelled Churned (=1). All others are Loyal (=0).
 
@@ -163,7 +163,7 @@ streamlit run app/Home.py
 
 - **Secrets Management:** `SENDER_EMAIL` and `APP_PASSWORD` (Gmail SMTP credentials) are managed via Streamlit Secrets on cloud and a `.env` file locally. Neither is committed to version control.
 - **Admin Gate:** The Nightly Batch Sync feature on the Home page is protected by an `ADMIN_PASSWORD` secret — random visitors cannot trigger server-side pipeline execution.
-- **Raw Data:** `Online_Retail.xlsx` (the locally renamed Amazon Sales Dataset file) is excluded from GitHub (file size). The compiled `.db` database and all `.pkl` model files are committed instead so the cloud deployment is fully functional without the source file.
+- **Raw Data:** `Online Retail.xlsx` is excluded from GitHub (file size). The compiled `.db` database and all `.pkl` model files are committed instead so the cloud deployment is fully functional without the source file.
 
 ---
 
