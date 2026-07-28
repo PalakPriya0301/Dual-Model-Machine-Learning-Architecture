@@ -44,7 +44,7 @@ def run():
 
         df_rfm = df.groupby("CustomerID").agg(
             Recency=("InvoiceDate", lambda x: (current_date - x.max()).days),
-            Frequency=("InvoiceNo", "nunique"),   # FIX: nunique on InvoiceNo, not CustomerID
+            Frequency=("InvoiceNo", "nunique"),   
             Monetary=("TotalSpend", "sum"),
             TotalQuantity=("Quantity", "sum"),
         ).reset_index()

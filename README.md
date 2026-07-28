@@ -1,4 +1,4 @@
-# 📊 Enterprise AI-Driven CRM Platform: Dual-Model Machine Learning Architecture
+# 📊 Dual-Model Machine Learning Architecture for Customer Segmentation and Churn Prediction
 
 An end-to-end Data Science and Predictive Analytics solution built as a graduation major project for the Bachelor of Computer Applications (BCA) program. This platform engineers raw transaction logs into actionable customer profiles and deploys a predictive engine to forecast and mitigate customer churn in real time.
 
@@ -45,10 +45,13 @@ The platform follows a modular, industry-standard data science pipeline distribu
 ├── etl/
 │   ├── 1_database_setup.py            # Database initialisation and order cleaning
 │   └── 2_feature_engineering.py       # RFM aggregation and churn labelling
-├── models/
-│   ├── 3_model_training.py            # Training script for K-Means and Random Forest
+├── ├── models/
+│   ├── benchmark_models.py            # Supervised algorithm evaluation and comparison suite
+│   ├── hyperparameter_tuning.py       # GridSearchCV pipeline for optimal model parameters
+│   ├── 3_model_training.py            # Master training script executing the end-to-end ML pipeline
 │   ├── clustering_validation.png      # Elbow and Silhouette evaluation charts
 │   ├── feature_importance.png         # Gini importance bar chart
+│   ├── shap_summary.png               # SHAP feature impact visualization
 │   └── model_evaluation.png           # Confusion Matrix and ROC-AUC curve
 ├── requirements.txt                   # Pinned dependency manifest
 └── README.md                          # Project documentation
@@ -72,6 +75,8 @@ The platform follows a modular, industry-standard data science pipeline distribu
 
 - **Algorithm:** Random Forest Classifier — 300 estimators, `max_depth=8`, `min_samples_split=10`, `class_weight='balanced'`.
 - **Features Used:** `Frequency` and `Monetary` only.
+- **Algorithm Benchmarking:** The pipeline dynamically evaluates multiple architectures (Logistic Regression, Decision Trees, Random Forest, XGBoost, LightGBM, etc.) via 5-fold stratified cross-validation (`benchmark_models.py`) to select the optimal model based on F1-Score.
+- **Hyperparameter Optimization:** Includes an automated `GridSearchCV` pipeline (`hyperparameter_tuning.py`) to fine-tune the winning architecture's parameters, ensuring maximum predictive accuracy (currently set to baseline to maintain strict reporting alignment).
 - **Feature Exclusion Rationale:**
 
   | Feature | Decision | Reason |
@@ -130,9 +135,9 @@ pip install -r requirements.txt
 
 **3. Place the raw dataset in the `data/` folder:**
 
-Download `Online Retail.xlsx` from the [UCI ML Repository](https://archive.ics.uci.edu/dataset/352/online+retail) and place it at:
+Download the [Amazon Sales Dataset](https://www.kaggle.com/datasets/rohiteng/amazon-sales-dataset) from Kaggle, rename it to `Online_Retail.xlsx` (the filename expected by the ETL script), and place it at:
 ```
-data/Online Retail.xlsx
+data/Online_Retail.xlsx
 ```
 
 **4. Run the ETL pipeline:**
@@ -158,7 +163,7 @@ streamlit run app/Home.py
 
 - **Secrets Management:** `SENDER_EMAIL` and `APP_PASSWORD` (Gmail SMTP credentials) are managed via Streamlit Secrets on cloud and a `.env` file locally. Neither is committed to version control.
 - **Admin Gate:** The Nightly Batch Sync feature on the Home page is protected by an `ADMIN_PASSWORD` secret — random visitors cannot trigger server-side pipeline execution.
-- **Raw Data:** `Online Retail.xlsx` is excluded from GitHub (file size). The compiled `.db` database and all `.pkl` model files are committed instead so the cloud deployment is fully functional without the source file.
+- **Raw Data:** `Online_Retail.xlsx` (the locally renamed Amazon Sales Dataset file) is excluded from GitHub (file size). The compiled `.db` database and all `.pkl` model files are committed instead so the cloud deployment is fully functional without the source file.
 
 ---
 
@@ -183,5 +188,5 @@ models/model_evaluation.png
 
 ## 👩‍💻 Author
 
-**Palak Priya** — BCA Major Project
+**Palak** — BCA Major Project
 GitHub: [PalakPriya0301](https://github.com/PalakPriya0301)
