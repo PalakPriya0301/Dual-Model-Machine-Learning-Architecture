@@ -193,6 +193,16 @@ def run():
     kmeans = KMeans(n_clusters=3, random_state=42, n_init=10).fit(X_scaled)
     df['Cluster'] = kmeans.labels_
     
+    log.info("Dynamically assigning Personas based on Monetary rank...")
+    monetary_rank = df.groupby('Cluster')['Monetary'].mean().sort_values(ascending=False)
+    persona_mapping = {
+        monetary_rank.index[0]: "Top-Tier Customers",
+        monetary_rank.index[1]: "Promising Newcomers",
+        monetary_rank.index[2]: "At-Risk Sleepers"
+    }
+    df['Persona'] = df['Cluster'].map(persona_mapping)
+    # ------------------------------------
+
     log.info("Executing Supervised Algorithm Benchmarking...")
     X_train, X_test, y_train, y_test = train_test_split(X_churn, y, test_size=0.2, random_state=42, stratify=y)
     
@@ -229,7 +239,6 @@ def run():
     joblib.dump(final_model, os.path.join(APP_DIR, "churn_model.pkl"))
     joblib.dump(scaler, os.path.join(APP_DIR, "scaler.pkl"))
     df.to_pickle(os.path.join(APP_DIR, "historical_data.pkl"))
-
 
     metrics = {
         "best_model_architecture": best_name,
